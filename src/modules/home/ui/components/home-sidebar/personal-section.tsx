@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { HistoryIcon, ListVideoIcon, ThumbsUpIcon } from "lucide-react";
+import { useAuth, useClerk } from "@clerk/nextjs";
 
 import {
   SidebarGroup,
@@ -9,17 +11,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { HistoryIcon, ListVideoIcon, ThumbsUpIcon } from "lucide-react";
 
 const items = [
   {
     title: "History",
     url: "/playlists/history",
     icon: HistoryIcon,
-    auth: true
+    auth: true,
   },
   {
-    title: "Liked Viceos",
+    title: "Liked Videos",
     url: "/playlists/liked",
     icon: ThumbsUpIcon,
     auth: true,
@@ -32,6 +33,9 @@ const items = [
 ];
 
 export const PersonalSection = () => {
+  const { isSignedIn } = useAuth();
+  const clerk = useClerk();
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel></SidebarGroupLabel>
@@ -43,11 +47,16 @@ export const PersonalSection = () => {
                 tooltip={item.title}
                 asChild
                 isActive={false} //todo: Change to look at current pathname
-                onClick={() => {}} //todo: Click function
+                onClick={(e) => {
+                  if (!isSignedIn && item.auth) {
+                    e.preventDefault();
+                    return clerk.openSignIn();
+                  }
+                }}
               >
                 <Link href={item.url} className="flex items-center gap-4">
-                    <item.icon />
-                    <span className="text-sm">{item.title}</span>
+                  <item.icon />
+                  <span className="text-sm">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
